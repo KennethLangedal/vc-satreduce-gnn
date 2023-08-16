@@ -12,6 +12,8 @@
 #include <stats.hpp>
 #include <trailstate.hpp>
 
+#include "gcn.h"
+
 namespace vc_bnb {
 
 struct Solver {
@@ -98,6 +100,10 @@ struct Solver {
     std::vector<std::vector<int>> satellites_;
     Solution best_solution;
     int iteration_count = 0;
+
+    gcn model;
+    gcn_data model_data;
+    int *new_id, *old_id;
 
 private:
     Graph graph_;

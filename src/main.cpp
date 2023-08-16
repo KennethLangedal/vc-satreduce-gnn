@@ -44,11 +44,15 @@ int main(int argc, char *argv[]) {
     full_desc.add_options()
         ("instance", po::value<std::string>(), "Specify the instance file")
         ;
+    full_desc.add_options()
+        ("model", po::value<std::string>(), "Specify the model file")
+        ;
     // clang-format on
     full_desc.add(desc);
 
     po::positional_options_description pdesc;
     pdesc.add("instance", 1);
+    pdesc.add("model", 2);
 
     po::variables_map vm;
     po::store(po::command_line_parser(argc, argv).options(full_desc).positional(pdesc).run(), vm);
@@ -64,6 +68,32 @@ int main(int argc, char *argv[]) {
     Input_Reader reader;
     Graph graph = reader.read_instance(stream);
     vc_bnb::Solver sol(graph);
+
+    if (vm.count("model")) {
+        std::string model_path = vm["model"].as<std::string>();
+        FILE *fm = fopen(model_path.data(), "r");
+        if (fm == NULL) {
+            std::cout << "Could not parse model " << model_path << std::endl;
+            return 1;
+        }
+        sol.model = gcn_parse(fm);
+        fclose(fm);
+
+        int N = graph.size() * 2, M = 0;
+        for (int i = 0; i < graph.size(); i++) {
+            M += graph.raw_neighbors(i).size();
+        }
+        int *V = (int *)malloc(sizeof(int) * (N + 1));
+        int *E = (int *)malloc(sizeof(int) * M * 2);
+
+        sol.model_data = gcn_data_init(N, V, E);
+
+        sol.new_id = (int *)malloc(sizeof(int) * N);
+        sol.old_id = (int *)malloc(sizeof(int) * N);
+
+    } else {
+        sol.model_data.x = NULL;
+    }
 
     // init flags
     sol.flags = Flags(vm);

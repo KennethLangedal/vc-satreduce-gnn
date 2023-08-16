@@ -6,7 +6,7 @@ threads = dependency('threads')
 boost_dep = dependency('boost', modules : ['program_options', 'system'])
 
 # We require CaDiCaL to be installed.
-cadical_dep = dependency('cadical')
+cadical_dep = dependency('../cadical.pc')
 
 executable('vc-bnb',
            'src/algorithms.cpp',
@@ -15,6 +15,7 @@ executable('vc-bnb',
            'src/input-reader.cpp',
            'src/main.cpp',
            'src/reductions.cpp',
+           'gnn/gcn.cpp',
            dependencies : [
                boost_dep,
                cadical_dep,
@@ -22,7 +23,8 @@ executable('vc-bnb',
            ],
            include_directories: [
                include_directories('include/'),
+               include_directories('gnn/'),
            ],
-           cpp_args: ['-std=c++17'],
+           cpp_args: ['-std=c++17', '-march=native', '-O3'],
            install: true
 )

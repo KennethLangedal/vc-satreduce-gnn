@@ -157,6 +157,41 @@ void Solver::project_solution(Solution &out, const std::vector<vertex_type> &vc)
 }
 
 int Solver::get_next_vertex() {
+    if (model_data.x != NULL) {
+        int next_label = 0;
+        
+        for (int i = 0; i < graph_.size(); i++) {
+            if (!graph_.is_removed(i)) {
+                new_id[i] = next_label;
+                old_id[next_label] = i;
+                next_label++;
+            }
+        }
+        
+        model_data.N = next_label;
+        
+        model_data.V[0] = 0;
+        for (int i = 0; i < model_data.N; i++) {
+            model_data.V[i + 1] = model_data.V[i];
+            for (int j : graph_.raw_neighbors(old_id[i])) {
+                if (graph_.is_removed(j))
+                    continue;
+                model_data.E[model_data.V[i + 1]] = new_id[j];
+                model_data.V[i + 1]++;
+            }
+        }
+
+        gcn_eval(model, model_data);
+
+        int next_vertex = 0;
+        for (int i = 1; i < model_data.N; i++) {
+            if (model_data.y[i] > model_data.y[next_vertex])
+                next_vertex = i;
+        }
+
+        return old_id[next_vertex];
+    }
+
     int next_vertex = INT_MAX;
     int next_vertex_neighbors_count = -1;
 

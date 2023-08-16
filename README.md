@@ -27,8 +27,10 @@ ninja
 and invoked by:
 
 ```
-./vc-bnb --stats <input file>
+./vc-bnb --stats <input file> <model>
 ```
+
+The \<model\> parameter is optional. Without it, the solver will use max degree branching instead.
 
 ## Citing
 
